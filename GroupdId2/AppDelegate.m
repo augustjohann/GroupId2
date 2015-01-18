@@ -7,6 +7,10 @@
 //
 
 #import "AppDelegate.h"
+#import "PT.h"
+#import "PTStatus.h"
+#import "Group.h"
+#import "Status.h"
 
 @interface AppDelegate ()
 
@@ -17,6 +21,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    _managedObjectModel=nil;
+    _managedObjectContext=nil;
+    _persistentStoreCoordinator=nil;
+
     return YES;
 }
 
@@ -62,6 +70,36 @@
     }
     NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"GroupdId2" withExtension:@"momd"];
     _managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
+    
+    
+    NSFetchRequest *tmpTemplate;
+    NSEntityDescription *tmpEntity;
+    NSPredicate *tmpPredicate;
+
+    // 1. GROUP_BY_GROUP_ID
+    tmpEntity = [[_managedObjectModel entitiesByName] objectForKey:@"Group"];
+    tmpTemplate = [[NSFetchRequest alloc] init];
+    [tmpTemplate setEntity:tmpEntity];
+    tmpPredicate = [NSPredicate predicateWithFormat:@"(groupId == $value)"];
+    [tmpTemplate setPredicate:tmpPredicate];
+    [_managedObjectModel setFetchRequestTemplate:tmpTemplate forName:@"GROUP_BY_GROUP_ID"];
+    
+    // 2. PT_STATUS_BY_GROUP_ID
+    tmpEntity = [[_managedObjectModel entitiesByName] objectForKey:@"PTStatus"];
+    tmpTemplate = [[NSFetchRequest alloc] init];
+    [tmpTemplate setEntity:tmpEntity];
+    tmpPredicate = [NSPredicate predicateWithFormat:@"(ANY status.group.groupId == $value)"];
+    [tmpTemplate setPredicate:tmpPredicate];
+    [_managedObjectModel setFetchRequestTemplate:tmpTemplate forName:@"PT_STATUS_BY_GROUP_ID"];
+    
+    // 3. PT_BY_GROUP_ID
+    tmpEntity = [[_managedObjectModel entitiesByName] objectForKey:@"PT"];
+    tmpTemplate = [[NSFetchRequest alloc] init];
+    [tmpTemplate setEntity:tmpEntity];
+    tmpPredicate = [NSPredicate predicateWithFormat:@"((ANY hasStatus.status.group.groupId == $value) OR (ANY targetedByPTStatus.status.group.groupId == $value))"];
+    [tmpTemplate setPredicate:tmpPredicate];
+    [_managedObjectModel setFetchRequestTemplate:tmpTemplate forName:@"PT_BY_GROUP_ID"];
+    
     return _managedObjectModel;
 }
 
@@ -123,5 +161,234 @@
         }
     }
 }
+
+#pragma marks - Auxiliary
+
+- (void)fillAndQueryDB {
+    
+    NSMutableArray *group=[[NSMutableArray alloc] init];
+    NSMutableArray *pt=[[NSMutableArray alloc] init];
+    NSMutableArray *status=[[NSMutableArray alloc] init];
+    NSMutableArray *ptstatus=[[NSMutableArray alloc] init];
+    
+    // 1.) Create the entities (Empty Database for the first Run !):
+    
+    // 3 x Group
+    int i=0;
+    for(NSString *value in @[@"Group1",@"Group2",@"Group3"]) {
+        group[i]=[self newGroup:value];
+        ((Group*)group[i]).groupId=@(i);
+        i++;
+    }
+    
+    // 5 x Status
+    i=0;
+    for(NSString *value in @[@"Status1",@"Status2",@"Status3",@"Status4",@"Status5"]) {
+        status[i]=[self newStatus:value];
+        i++;
+    }
+    
+    // 8 x PTStatus
+    i=0;
+    for(NSString *value in @[@"PTStatus1",@"PTStatus2",@"PTStatus3",@"PTStatus4",@"PTStatus5",@"PTStatus6",@"PTStatus7",@"PTStatus8"]) {
+        ptstatus[i]=[self newPTStatus:value];
+        i++;
+    }
+    
+    // 5 x PT
+    i=0;
+    for(NSString *value in @[@"PT1",@"PT2",@"PT3",@"PT4",@"PT5"]) {
+        pt[i]=[self newPT:value];
+        i++;
+    }
+    
+    // 2.) Make the links:
+    
+    [(Group*)group[0] addHasStatus:[NSSet setWithArray:@[status[0],status[2],status[3]]]];
+    [(Group*)group[1] addHasStatus:[NSSet setWithArray:@[status[1],status[4]]]];
+    [(Group*)group[2] addHasStatus:[NSSet setWithArray:@[status[2],status[3],status[4]]]];
+    
+    [(Status*)status[0] addPtStatus:[NSSet setWithArray:@[ptstatus[0],ptstatus[7]]]];
+    [(Status*)status[1] addPtStatus:[NSSet setWithArray:@[ptstatus[1],ptstatus[2],ptstatus[4],ptstatus[7]]]];
+    [(Status*)status[2] addPtStatus:[NSSet setWithArray:@[ptstatus[1],ptstatus[2],ptstatus[3],ptstatus[5]]]];
+    [(Status*)status[3] addPtStatus:[NSSet setWithArray:@[ptstatus[5],ptstatus[6],ptstatus[7]]]];
+    [(Status*)status[4] addPtStatus:[NSSet setWithArray:@[ptstatus[0],ptstatus[3],ptstatus[4],ptstatus[5],ptstatus[7]]]];
+    
+    [(PT*)pt[0] addTargetedByPTStatus:[NSSet setWithArray:@[ptstatus[0],ptstatus[3],ptstatus[4]]]];
+    [(PT*)pt[1] addTargetedByPTStatus:[NSSet setWithArray:@[ptstatus[2],ptstatus[6],ptstatus[5]]]];
+    [(PT*)pt[2] addTargetedByPTStatus:[NSSet setWithArray:@[ptstatus[1],ptstatus[6],ptstatus[7]]]];
+    [(PT*)pt[3] addTargetedByPTStatus:[NSSet setWithArray:@[ptstatus[3],ptstatus[4],ptstatus[5]]]];
+    [(PT*)pt[4] addTargetedByPTStatus:[NSSet setWithArray:@[ptstatus[2],ptstatus[5],ptstatus[6]]]];
+    
+    [(PT*)pt[0] addHasStatus:[NSSet setWithArray:@[ptstatus[0],ptstatus[1],ptstatus[6]]]];
+    [(PT*)pt[1] addHasStatus:[NSSet setWithArray:@[ptstatus[3],ptstatus[4],ptstatus[5]]]];
+    [(PT*)pt[2] addHasStatus:[NSSet setWithArray:@[ptstatus[4],ptstatus[6],ptstatus[7]]]];
+    [(PT*)pt[3] addHasStatus:[NSSet setWithArray:@[ptstatus[2],ptstatus[3],ptstatus[7]]]];
+    [(PT*)pt[4] addHasStatus:[NSSet setWithArray:@[ptstatus[0],ptstatus[1],ptstatus[5]]]];
+    
+    [self saveContext];
+    
+    // 3.1.) Query via Group :
+    
+    NSArray *groupA=[self fetchGroupByGroupId:@(2)];
+    NSMutableSet *resultPT=[[NSMutableSet alloc] init];
+    for (Group *group in groupA) {
+        for (Status *status in group.hasStatus) {
+            for (PTStatus *ptstatus in status.ptStatus) {
+                if (ptstatus.targetPT!=nil) {
+                    [resultPT addObject:ptstatus.targetPT];
+                }
+                if (ptstatus.pt!=nil) {
+                    [resultPT addObject:ptstatus.pt];
+                }
+            }
+        }
+    }
+    
+    // 4.1.) Result:
+
+    NSLog(@"Found %d PT Entities ...",resultPT.count);
+    for (PT *pt in resultPT) {
+        NSLog(@"PT with value = %@",pt.value);
+    }
+    
+    // 3.2.) Query via PTStatus :
+    
+    NSArray *ptstatusA=[self fetchPTStatusByGroupId:@(2)];
+    resultPT=[[NSMutableSet alloc] init];
+    for (PTStatus *ptstatus in ptstatusA) {
+        if (ptstatus.targetPT!=nil) {
+            [resultPT addObject:ptstatus.targetPT];
+        }
+        if (ptstatus.pt!=nil) {
+            [resultPT addObject:ptstatus.pt];
+        }
+    }
+    
+    // 4.2.) Result:
+    
+    NSLog(@"Found %d PT Entities ...",resultPT.count);
+    for (PT *pt in resultPT) {
+        NSLog(@"PT with value = %@",pt.value);
+    }
+
+    // 3.3.) Fetch PT directly:
+    
+    NSArray *ptA=[self fetchPTByGroupId:@(2)];
+    resultPT=[[NSMutableSet alloc] init];
+    for (PT *pt in ptA) {
+        [resultPT addObject:pt];
+    }
+    
+    // 4.3.) Result:
+    
+    NSLog(@"Found %d PT Entities ...",resultPT.count);
+    for (PT *pt in resultPT) {
+        NSLog(@"PT with value = %@",pt.value);
+    }
+
+}
+
+- (NSArray *)fetchGroupByGroupId:(NSNumber *)value
+{
+    NSError *error = nil;
+    
+    NSManagedObjectModel *model = _managedObjectModel;
+    
+    NSDictionary *substitutionDictionary = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", nil];
+    
+    NSFetchRequest *fetchRequest = [model fetchRequestFromTemplateWithName:@"GROUP_BY_GROUP_ID" substitutionVariables:substitutionDictionary];
+    
+    NSArray *results = [_managedObjectContext executeFetchRequest:fetchRequest error:&error];
+    
+    return results;
+}
+
+- (NSArray *)fetchPTStatusByGroupId:(NSNumber *)value
+{
+    NSError *error = nil;
+    
+    NSManagedObjectModel *model = _managedObjectModel;
+    
+    NSDictionary *substitutionDictionary = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", nil];
+    
+    NSFetchRequest *fetchRequest = [model fetchRequestFromTemplateWithName:@"PT_STATUS_BY_GROUP_ID" substitutionVariables:substitutionDictionary];
+    
+    NSArray *results = [_managedObjectContext executeFetchRequest:fetchRequest error:&error];
+    
+    return results;
+}
+
+- (NSArray *)fetchPTByGroupId:(NSNumber *)value
+{
+    NSError *error = nil;
+    
+    NSManagedObjectModel *model = _managedObjectModel;
+    
+    NSDictionary *substitutionDictionary = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", nil];
+    
+    NSFetchRequest *fetchRequest = [model fetchRequestFromTemplateWithName:@"PT_BY_GROUP_ID" substitutionVariables:substitutionDictionary];
+    
+    NSArray *results = [_managedObjectContext executeFetchRequest:fetchRequest error:&error];
+    
+    return results;
+}
+
+- (PT*)newPT:(NSString *)value
+{
+    PT *newEntity;
+    NSError *error;
+    
+    newEntity = (PT *)[NSEntityDescription insertNewObjectForEntityForName:@"PT" inManagedObjectContext:self.managedObjectContext];
+    newEntity.value=value;
+    
+    if (![self.managedObjectContext save:&error]) {
+        NSLog(@"Error occurred: %@",[error description]);
+    }
+    return newEntity;
+}
+
+- (PTStatus*)newPTStatus:(NSString *)value
+{
+    PTStatus *newEntity;
+    NSError *error;
+    
+    newEntity = (PTStatus *)[NSEntityDescription insertNewObjectForEntityForName:@"PTStatus" inManagedObjectContext:self.managedObjectContext];
+    newEntity.value=value;
+    
+    if (![self.managedObjectContext save:&error]) {
+        NSLog(@"Error occurred: %@",[error description]);
+    }
+    return newEntity;
+}
+
+- (Status*)newStatus:(NSString *)value
+{
+    Status *newEntity;
+    NSError *error;
+    
+    newEntity = (Status *)[NSEntityDescription insertNewObjectForEntityForName:@"Status" inManagedObjectContext:self.managedObjectContext];
+    newEntity.value=value;
+    
+    if (![self.managedObjectContext save:&error]) {
+        NSLog(@"Error occurred: %@",[error description]);
+    }
+    return newEntity;
+}
+
+- (Group*)newGroup:(NSString *)value
+{
+    Group *newEntity;
+    NSError *error;
+    
+    newEntity = (Group *)[NSEntityDescription insertNewObjectForEntityForName:@"Group" inManagedObjectContext:self.managedObjectContext];
+    newEntity.value=value;
+    
+    if (![self.managedObjectContext save:&error]) {
+        NSLog(@"Error occurred: %@",[error description]);
+    }
+    return newEntity;
+}
+
 
 @end
