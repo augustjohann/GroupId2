@@ -80,7 +80,7 @@
     tmpEntity = [[_managedObjectModel entitiesByName] objectForKey:@"Group"];
     tmpTemplate = [[NSFetchRequest alloc] init];
     [tmpTemplate setEntity:tmpEntity];
-    tmpPredicate = [NSPredicate predicateWithFormat:@"(groupId == $value)"];
+    tmpPredicate = [NSPredicate predicateWithFormat:@"(groupId == $groupdid)"];
     [tmpTemplate setPredicate:tmpPredicate];
     [_managedObjectModel setFetchRequestTemplate:tmpTemplate forName:@"GROUP_BY_GROUP_ID"];
     
@@ -88,7 +88,7 @@
     tmpEntity = [[_managedObjectModel entitiesByName] objectForKey:@"PTStatus"];
     tmpTemplate = [[NSFetchRequest alloc] init];
     [tmpTemplate setEntity:tmpEntity];
-    tmpPredicate = [NSPredicate predicateWithFormat:@"(ANY status.group.groupId == $value)"];
+    tmpPredicate = [NSPredicate predicateWithFormat:@"((ANY hasBeenDeleted == $deleted) AND (ANY status.group.groupId == $groupdid))"];
     [tmpTemplate setPredicate:tmpPredicate];
     [_managedObjectModel setFetchRequestTemplate:tmpTemplate forName:@"PT_STATUS_BY_GROUP_ID"];
     
@@ -96,8 +96,9 @@
     tmpEntity = [[_managedObjectModel entitiesByName] objectForKey:@"PT"];
     tmpTemplate = [[NSFetchRequest alloc] init];
     [tmpTemplate setEntity:tmpEntity];
-    tmpPredicate = [NSPredicate predicateWithFormat:@"((ANY hasStatus.status.group.groupId == $value) OR (ANY targetedByPTStatus.status.group.groupId == $value))"];
+    tmpPredicate = [NSPredicate predicateWithFormat:@"((ANY hasStatus.status.group.groupId == $groupdid) AND (ANY hasStatus.hasBeenDeleted == $deleted))"];
     [tmpTemplate setPredicate:tmpPredicate];
+    [tmpTemplate setSortDescriptors:@[[[NSSortDescriptor alloc] initWithKey:@"requestDate" ascending:NO],[[NSSortDescriptor alloc] initWithKey:@"number" ascending:YES]]];
     [_managedObjectModel setFetchRequestTemplate:tmpTemplate forName:@"PT_BY_GROUP_ID"];
     
     return _managedObjectModel;
@@ -191,14 +192,15 @@
     // 8 x PTStatus
     i=0;
     for(NSString *value in @[@"PTStatus1",@"PTStatus2",@"PTStatus3",@"PTStatus4",@"PTStatus5",@"PTStatus6",@"PTStatus7",@"PTStatus8"]) {
-        ptstatus[i]=[self newPTStatus:value];
+        // alternately setting deletedStatus to YES/NO :
+        ptstatus[i]=[self newPTStatus:value deletedStatus:((i%2)==1)];
         i++;
     }
     
     // 5 x PT
     i=0;
     for(NSString *value in @[@"PT1",@"PT2",@"PT3",@"PT4",@"PT5"]) {
-        pt[i]=[self newPT:value];
+        pt[i]=[self newPT:value number:@(i)];
         i++;
     }
     
@@ -235,10 +237,7 @@
     for (Group *group in groupA) {
         for (Status *status in group.hasStatus) {
             for (PTStatus *ptstatus in status.ptStatus) {
-                if (ptstatus.targetPT!=nil) {
-                    [resultPT addObject:ptstatus.targetPT];
-                }
-                if (ptstatus.pt!=nil) {
+                if (ptstatus.pt!=nil && [ptstatus.hasBeenDeleted boolValue]==NO) {
                     [resultPT addObject:ptstatus.pt];
                 }
             }
@@ -247,19 +246,16 @@
     
     // 4.1.) Result:
 
-    NSLog(@"Found %d PT Entities ...",resultPT.count);
+    NSLog(@"Found %ld PT Entities ...",resultPT.count);
     for (PT *pt in resultPT) {
         NSLog(@"PT with value = %@",pt.value);
     }
     
     // 3.2.) Query via PTStatus :
     
-    NSArray *ptstatusA=[self fetchPTStatusByGroupId:@(2)];
+    NSArray *ptstatusA=[self fetchPTStatusByGroupId:@(2) deletedStatus:NO];
     resultPT=[[NSMutableSet alloc] init];
     for (PTStatus *ptstatus in ptstatusA) {
-        if (ptstatus.targetPT!=nil) {
-            [resultPT addObject:ptstatus.targetPT];
-        }
         if (ptstatus.pt!=nil) {
             [resultPT addObject:ptstatus.pt];
         }
@@ -267,14 +263,14 @@
     
     // 4.2.) Result:
     
-    NSLog(@"Found %d PT Entities ...",resultPT.count);
+    NSLog(@"Found %ld PT Entities ...",resultPT.count);
     for (PT *pt in resultPT) {
         NSLog(@"PT with value = %@",pt.value);
     }
 
     // 3.3.) Fetch PT directly:
     
-    NSArray *ptA=[self fetchPTByGroupId:@(2)];
+    NSArray *ptA=[self fetchPTByGroupId:@(2) deletedStatus:NO];
     resultPT=[[NSMutableSet alloc] init];
     for (PT *pt in ptA) {
         [resultPT addObject:pt];
@@ -282,7 +278,7 @@
     
     // 4.3.) Result:
     
-    NSLog(@"Found %d PT Entities ...",resultPT.count);
+    NSLog(@"Found %ld PT Entities ...",resultPT.count);
     for (PT *pt in resultPT) {
         NSLog(@"PT with value = %@",pt.value);
     }
@@ -295,7 +291,7 @@
     
     NSManagedObjectModel *model = _managedObjectModel;
     
-    NSDictionary *substitutionDictionary = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", nil];
+    NSDictionary *substitutionDictionary = [NSDictionary dictionaryWithObjectsAndKeys:value, @"groupdid", nil];
     
     NSFetchRequest *fetchRequest = [model fetchRequestFromTemplateWithName:@"GROUP_BY_GROUP_ID" substitutionVariables:substitutionDictionary];
     
@@ -304,13 +300,13 @@
     return results;
 }
 
-- (NSArray *)fetchPTStatusByGroupId:(NSNumber *)value
+- (NSArray *)fetchPTStatusByGroupId:(NSNumber *)value deletedStatus:(BOOL)status
 {
     NSError *error = nil;
     
     NSManagedObjectModel *model = _managedObjectModel;
     
-    NSDictionary *substitutionDictionary = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", nil];
+    NSDictionary *substitutionDictionary = [NSDictionary dictionaryWithObjectsAndKeys:value, @"groupdid",@(status), @"deleted", nil];
     
     NSFetchRequest *fetchRequest = [model fetchRequestFromTemplateWithName:@"PT_STATUS_BY_GROUP_ID" substitutionVariables:substitutionDictionary];
     
@@ -319,13 +315,13 @@
     return results;
 }
 
-- (NSArray *)fetchPTByGroupId:(NSNumber *)value
+- (NSArray *)fetchPTByGroupId:(NSNumber *)value deletedStatus:(BOOL)status
 {
     NSError *error = nil;
     
     NSManagedObjectModel *model = _managedObjectModel;
     
-    NSDictionary *substitutionDictionary = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", nil];
+    NSDictionary *substitutionDictionary = [NSDictionary dictionaryWithObjectsAndKeys:value, @"groupdid",@(status), @"deleted", nil];
     
     NSFetchRequest *fetchRequest = [model fetchRequestFromTemplateWithName:@"PT_BY_GROUP_ID" substitutionVariables:substitutionDictionary];
     
@@ -334,13 +330,15 @@
     return results;
 }
 
-- (PT*)newPT:(NSString *)value
+- (PT*)newPT:(NSString *)value number:(NSNumber *)number
 {
     PT *newEntity;
     NSError *error;
     
     newEntity = (PT *)[NSEntityDescription insertNewObjectForEntityForName:@"PT" inManagedObjectContext:self.managedObjectContext];
     newEntity.value=value;
+    newEntity.requestDate=[NSDate date];
+    newEntity.number=number;
     
     if (![self.managedObjectContext save:&error]) {
         NSLog(@"Error occurred: %@",[error description]);
@@ -348,13 +346,14 @@
     return newEntity;
 }
 
-- (PTStatus*)newPTStatus:(NSString *)value
+- (PTStatus*)newPTStatus:(NSString *)value deletedStatus:(BOOL)status
 {
     PTStatus *newEntity;
     NSError *error;
     
     newEntity = (PTStatus *)[NSEntityDescription insertNewObjectForEntityForName:@"PTStatus" inManagedObjectContext:self.managedObjectContext];
     newEntity.value=value;
+    newEntity.hasBeenDeleted=@(status);
     
     if (![self.managedObjectContext save:&error]) {
         NSLog(@"Error occurred: %@",[error description]);

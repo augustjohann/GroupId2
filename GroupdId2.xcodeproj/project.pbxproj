@@ -15,10 +15,10 @@
 		285710B01A66CE5200F088A0 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 285710AF1A66CE5200F088A0 /* Images.xcassets */; };
 		285710B31A66CE5200F088A0 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 285710B11A66CE5200F088A0 /* LaunchScreen.xib */; };
 		285710BF1A66CE5200F088A0 /* GroupdId2Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 285710BE1A66CE5200F088A0 /* GroupdId2Tests.m */; };
-		285710D61A66D04A00F088A0 /* Status.m in Sources */ = {isa = PBXBuildFile; fileRef = 285710D51A66D04A00F088A0 /* Status.m */; };
-		285710D91A66D04A00F088A0 /* Group.m in Sources */ = {isa = PBXBuildFile; fileRef = 285710D81A66D04A00F088A0 /* Group.m */; };
-		285710DC1A66D04A00F088A0 /* PTStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = 285710DB1A66D04A00F088A0 /* PTStatus.m */; };
-		285710DF1A66D04A00F088A0 /* PT.m in Sources */ = {isa = PBXBuildFile; fileRef = 285710DE1A66D04A00F088A0 /* PT.m */; };
+		28B2B9481A6D2FE90029CDB9 /* Group.m in Sources */ = {isa = PBXBuildFile; fileRef = 28B2B9471A6D2FE90029CDB9 /* Group.m */; };
+		28B2B94B1A6D2FEA0029CDB9 /* Status.m in Sources */ = {isa = PBXBuildFile; fileRef = 28B2B94A1A6D2FEA0029CDB9 /* Status.m */; };
+		28B2B94E1A6D2FEA0029CDB9 /* PTStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = 28B2B94D1A6D2FEA0029CDB9 /* PTStatus.m */; };
+		28B2B9511A6D2FEA0029CDB9 /* PT.m in Sources */ = {isa = PBXBuildFile; fileRef = 28B2B9501A6D2FEA0029CDB9 /* PT.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,14 +46,14 @@
 		285710B81A66CE5200F088A0 /* GroupdId2Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GroupdId2Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		285710BD1A66CE5200F088A0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		285710BE1A66CE5200F088A0 /* GroupdId2Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GroupdId2Tests.m; sourceTree = "<group>"; };
-		285710D41A66D04A00F088A0 /* Status.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Status.h; sourceTree = "<group>"; };
-		285710D51A66D04A00F088A0 /* Status.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Status.m; sourceTree = "<group>"; };
-		285710D71A66D04A00F088A0 /* Group.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Group.h; sourceTree = "<group>"; };
-		285710D81A66D04A00F088A0 /* Group.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Group.m; sourceTree = "<group>"; };
-		285710DA1A66D04A00F088A0 /* PTStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PTStatus.h; sourceTree = "<group>"; };
-		285710DB1A66D04A00F088A0 /* PTStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PTStatus.m; sourceTree = "<group>"; };
-		285710DD1A66D04A00F088A0 /* PT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PT.h; sourceTree = "<group>"; };
-		285710DE1A66D04A00F088A0 /* PT.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PT.m; sourceTree = "<group>"; };
+		28B2B9461A6D2FE90029CDB9 /* Group.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Group.h; sourceTree = "<group>"; };
+		28B2B9471A6D2FE90029CDB9 /* Group.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Group.m; sourceTree = "<group>"; };
+		28B2B9491A6D2FEA0029CDB9 /* Status.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Status.h; sourceTree = "<group>"; };
+		28B2B94A1A6D2FEA0029CDB9 /* Status.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Status.m; sourceTree = "<group>"; };
+		28B2B94C1A6D2FEA0029CDB9 /* PTStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PTStatus.h; sourceTree = "<group>"; };
+		28B2B94D1A6D2FEA0029CDB9 /* PTStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PTStatus.m; sourceTree = "<group>"; };
+		28B2B94F1A6D2FEA0029CDB9 /* PT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PT.h; sourceTree = "<group>"; };
+		28B2B9501A6D2FEA0029CDB9 /* PT.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PT.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,14 +77,6 @@
 		285710931A66CE5200F088A0 = {
 			isa = PBXGroup;
 			children = (
-				285710DD1A66D04A00F088A0 /* PT.h */,
-				285710DE1A66D04A00F088A0 /* PT.m */,
-				285710DA1A66D04A00F088A0 /* PTStatus.h */,
-				285710DB1A66D04A00F088A0 /* PTStatus.m */,
-				285710D71A66D04A00F088A0 /* Group.h */,
-				285710D81A66D04A00F088A0 /* Group.m */,
-				285710D41A66D04A00F088A0 /* Status.h */,
-				285710D51A66D04A00F088A0 /* Status.m */,
 				2857109E1A66CE5200F088A0 /* GroupdId2 */,
 				285710BB1A66CE5200F088A0 /* GroupdId2Tests */,
 				2857109D1A66CE5200F088A0 /* Products */,
@@ -111,6 +103,14 @@
 				285710AF1A66CE5200F088A0 /* Images.xcassets */,
 				285710B11A66CE5200F088A0 /* LaunchScreen.xib */,
 				285710A61A66CE5200F088A0 /* GroupdId2.xcdatamodeld */,
+				28B2B94F1A6D2FEA0029CDB9 /* PT.h */,
+				28B2B9501A6D2FEA0029CDB9 /* PT.m */,
+				28B2B94C1A6D2FEA0029CDB9 /* PTStatus.h */,
+				28B2B94D1A6D2FEA0029CDB9 /* PTStatus.m */,
+				28B2B9491A6D2FEA0029CDB9 /* Status.h */,
+				28B2B94A1A6D2FEA0029CDB9 /* Status.m */,
+				28B2B9461A6D2FE90029CDB9 /* Group.h */,
+				28B2B9471A6D2FE90029CDB9 /* Group.m */,
 				2857109F1A66CE5200F088A0 /* Supporting Files */,
 			);
 			path = GroupdId2;
@@ -243,13 +243,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				285710A51A66CE5200F088A0 /* AppDelegate.m in Sources */,
+				28B2B94B1A6D2FEA0029CDB9 /* Status.m in Sources */,
 				285710A81A66CE5200F088A0 /* GroupdId2.xcdatamodeld in Sources */,
+				28B2B9511A6D2FEA0029CDB9 /* PT.m in Sources */,
+				28B2B9481A6D2FE90029CDB9 /* Group.m in Sources */,
 				285710AB1A66CE5200F088A0 /* ViewController.m in Sources */,
-				285710DF1A66D04A00F088A0 /* PT.m in Sources */,
-				285710D91A66D04A00F088A0 /* Group.m in Sources */,
-				285710D61A66D04A00F088A0 /* Status.m in Sources */,
 				285710A21A66CE5200F088A0 /* main.m in Sources */,
-				285710DC1A66D04A00F088A0 /* PTStatus.m in Sources */,
+				28B2B94E1A6D2FEA0029CDB9 /* PTStatus.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

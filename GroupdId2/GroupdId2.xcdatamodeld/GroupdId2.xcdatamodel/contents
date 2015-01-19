@@ -6,11 +6,14 @@
         <relationship name="hasStatus" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Status" inverseName="group" inverseEntity="Status" syncable="YES"/>
     </entity>
     <entity name="PT" representedClassName="PT" syncable="YES">
+        <attribute name="number" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="requestDate" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="value" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="hasStatus" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="PTStatus" inverseName="pt" inverseEntity="PTStatus" syncable="YES"/>
         <relationship name="targetedByPTStatus" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="PTStatus" inverseName="targetPT" inverseEntity="PTStatus" syncable="YES"/>
     </entity>
     <entity name="PTStatus" representedClassName="PTStatus" syncable="YES">
+        <attribute name="hasBeenDeleted" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="value" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="pt" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PT" inverseName="hasStatus" inverseEntity="PT" syncable="YES"/>
         <relationship name="status" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Status" inverseName="ptStatus" inverseEntity="Status" syncable="YES"/>
@@ -22,9 +25,9 @@
         <relationship name="ptStatus" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="PTStatus" inverseName="status" inverseEntity="PTStatus" syncable="YES"/>
     </entity>
     <elements>
-        <element name="PT" positionX="-315" positionY="-459" width="128" height="88"/>
-        <element name="PTStatus" positionX="-117" positionY="-567" width="128" height="103"/>
-        <element name="Status" positionX="70" positionY="-612" width="128" height="88"/>
         <element name="Group" positionX="234" positionY="-469" width="128" height="88"/>
+        <element name="PT" positionX="-315" positionY="-459" width="128" height="118"/>
+        <element name="PTStatus" positionX="-117" positionY="-567" width="128" height="120"/>
+        <element name="Status" positionX="70" positionY="-612" width="128" height="88"/>
     </elements>
 </model>
